@@ -1,14 +1,15 @@
 use bevy::prelude::*;
 
+/* Mario was here */
+
 // Components
 struct Person; 
 struct Name(String); 
 
-// Systems
-fn hello_world() {
-    println!("hello world!");
-}
+// Resources (Globals)
+struct GreetTimer(Timer);
 
+// Systems
 fn add_people(mut commands: Commands) {
     commands
         .spawn((Person, Name("Elaina Proctor".to_string())))
@@ -16,18 +17,26 @@ fn add_people(mut commands: Commands) {
         .spawn((Person, Name("Zayna Nieves".to_string())));
 }
 
-fn greet_people(_person: &Person, name: &Name) {
-    println!("hello {}!", name.0);
+fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, _person: &Person, name: &Name) {
+    // Time is a resource added by add_plugins(DefaultPlugins)
+    // Timer is used to track the amount of time passed, Timer is provided by Bevy
+    timer.0.tick(time.delta_seconds);
+
+    if timer.0.finished {
+        println!("hello {}!", name.0);
+    }
+
 }
 // Entities
 
-pub struct HelloPlugin;
 
+// Plugins
+pub struct HelloPlugin;
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(add_people.system())
-        .add_system(hello_world.system())
-        .add_system(greet_people.system());
+        app.add_resource(GreetTimer(Timer::from_seconds(2.0, true)))
+            .add_startup_system(add_people.system())
+            .add_system(greet_people.system());
     }
 }
 

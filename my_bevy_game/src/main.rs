@@ -17,13 +17,15 @@ fn add_people(mut commands: Commands) {
         .spawn((Person, Name("Zayna Nieves".to_string())));
 }
 
-fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, _person: &Person, name: &Name) {
+fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, query: Query<(&Person, &Name)>) {
     // Time is a resource added by add_plugins(DefaultPlugins)
     // Timer is used to track the amount of time passed, Timer is provided by Bevy
     timer.0.tick(time.delta_seconds);
 
     if timer.0.finished {
-        println!("hello {}!", name.0);
+        for (_person, name) in query.iter() {
+            println!("hello {}!", name.0);
+        }
     }
 
 }
